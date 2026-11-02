@@ -1,0 +1,6 @@
+{
+  "name": "job-digest",
+  "version": "0.1.0",
+  "description": "Finds open senior roles that match a user's CV and preferences, scores fit, tracks what was already reported, and drafts tailored cover letters. Never submits applications on its own.",
+  "author": { "name": "Kelsey Atwood" }
+}
