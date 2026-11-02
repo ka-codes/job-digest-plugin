@@ -10,6 +10,8 @@ Never apply, contact anyone, create accounts, log in, or bypass paywalls. Drafti
 ## Inputs (in the user's working folder)
 - `profile.md`: background, target roles and levels, priority employers, locations in priority order, pay floor and goal, exclusions. Copy from `templates/profile.example.md` if missing and ask the user to fill it in.
 - `job-log.md`: saved roles, previously reported roles, closed roles, checked-not-qualifying. Create from `templates/job-log.md` if missing.
+- CV file(s) named in profile.md (.docx or .md, may be more than one version, e.g. a short and a detailed one). Treat all versions as one consistent source of truth: pull whichever level of detail or wording fits the context, but never credit experience that appears in none of them.
+- Cover-letter example file(s) named in profile.md, if any. Used only when the user asks for a cover letter (see below).
 
 ## Steps
 1. Read profile.md and job-log.md.
@@ -27,3 +29,10 @@ Never apply, contact anyone, create accounts, log in, or bypass paywalls. Drafti
 
 ## After the run
 Append NEW qualifying roles to job-log.md (date | title | org | location | pay | fit | link | status), mark closed roles, keep all other sections intact.
+
+## Drafting a cover letter (only when the user asks, for a specific role)
+1. Read the CV file(s) and cover-letter example file(s) named in profile.md, plus the writing rules there (length, font, tone, any line that must never appear).
+2. Match the voice and structure of the example letters, not a generic template.
+3. Where a section of an example letter already makes a point that genuinely applies to the new role (a strength, an achievement, a framing of a transition), reuse it directly rather than rewriting it from scratch; adapt only what the new role actually requires changing.
+4. Never invent experience, numbers, or claims not present in the CV file(s).
+5. Return the draft for the user to review; never send or submit it.
