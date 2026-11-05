@@ -12,23 +12,32 @@ function profilePath(workspaceDir) {
   return join(workspaceDir, 'profile.md');
 }
 
+// A Windows CI checkout can convert this repo's \n line endings to \r\n in
+// the built artifact (confirmed: it broke every item-line regex below except
+// the last line in the file, since a trailing \r defeats their `$` anchor).
+// Normalize at every read so parsing never depends on how a given build
+// happened to check the file out.
+function readTextFile(path) {
+  return readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
+}
+
 export function ensureProfileMd(workspaceDir) {
   const p = profilePath(workspaceDir);
   if (!existsSync(p)) {
-    writeFileSync(p, readFileSync(TEMPLATE_PATH, 'utf8'));
+    writeFileSync(p, readTextFile(TEMPLATE_PATH));
   }
   return p;
 }
 
 export function readProfileMd(workspaceDir) {
   ensureProfileMd(workspaceDir);
-  return readFileSync(profilePath(workspaceDir), 'utf8');
+  return readTextFile(profilePath(workspaceDir));
 }
 
 // Extracts a section's body straight from the shipped template (not a user's
 // workspace) — used to prefill the wizard, e.g. the sector-default employer list.
 export function getTemplateSection(headingStartsWith) {
-  const text = readFileSync(TEMPLATE_PATH, 'utf8');
+  const text = readTextFile(TEMPLATE_PATH);
   const lines = text.split('\n');
   const needle = headingStartsWith.toLowerCase();
   let start = -1;

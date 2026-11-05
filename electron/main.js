@@ -4,7 +4,7 @@
 // server (via JOB_DIGEST_ELECTRON) to store user config in Electron's
 // userData directory instead of next to the app code, since a packaged
 // install directory may not be writable (see app/lib/config.mjs).
-const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, Tray, Menu, MenuItem, nativeImage } = require('electron');
 
 const PORT = process.env.PORT || 4317;
 const SERVER_URL = `http://localhost:${PORT}`;
@@ -97,6 +97,35 @@ async function createWindow() {
     autoHideMenuBar: true,
   });
   win.loadURL(SERVER_URL);
+
+  // Electron shows no right-click menu at all by default — not even
+  // Cut/Copy/Paste, let alone spellcheck suggestions — unless the app
+  // builds one itself from the webContents' own context-menu event.
+  win.webContents.on('context-menu', (event, params) => {
+    const menu = new Menu();
+
+    for (const suggestion of params.dictionarySuggestions) {
+      menu.append(new MenuItem({
+        label: suggestion,
+        click: () => win.webContents.replaceMisspelling(suggestion),
+      }));
+    }
+    if (params.misspelledWord) {
+      menu.append(new MenuItem({
+        label: 'Add to dictionary',
+        click: () => win.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord),
+      }));
+      menu.append(new MenuItem({ type: 'separator' }));
+    }
+
+    menu.append(new MenuItem({ label: 'Cut', role: 'cut', enabled: params.editFlags.canCut }));
+    menu.append(new MenuItem({ label: 'Copy', role: 'copy', enabled: params.editFlags.canCopy }));
+    menu.append(new MenuItem({ label: 'Paste', role: 'paste', enabled: params.editFlags.canPaste }));
+    menu.append(new MenuItem({ type: 'separator' }));
+    menu.append(new MenuItem({ label: 'Select All', role: 'selectAll' }));
+
+    menu.popup();
+  });
 
   win.on('close', (event) => {
     if (!isQuitting) {

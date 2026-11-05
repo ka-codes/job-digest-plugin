@@ -45,7 +45,13 @@ export function startWizard(onComplete) {
 
   // ---- Priority-employers markdown <-> structured list, for step 4 ----
   function parseEmployersMarkdown(md) {
-    const lines = (md || '').split('\n');
+    // Windows-built releases can ship this file with \r\n line endings
+    // (confirmed: a GitHub Actions Windows-runner checkout converted it,
+    // even though the repo itself has \n) — a trailing \r breaks the item
+    // regex's `$` anchor on every line except the last, so only the final
+    // employer in the whole list ever parsed. Normalize defensively here
+    // regardless of what produced the line endings upstream.
+    const lines = (md || '').replace(/\r\n/g, '\n').split('\n');
     let intro = '';
     const groups = [];
     let current = null;
@@ -193,9 +199,11 @@ export function startWizard(onComplete) {
       status.textContent = `Creating ${path}…`;
       await api.post('/setup/workspace', { path });
       createBtn.disabled = false;
-      updateCreateLabel();
+      createBtn.textContent = '✓ Folder set';
+      createBtn.classList.add('success');
       status.textContent = `✓ Folder ready at ${path}`;
       nextBtn.disabled = false;
+      setTimeout(() => { createBtn.classList.remove('success'); updateCreateLabel(); }, 1500);
     });
 
     document.getElementById('wiz-next').addEventListener('click', async () => {

@@ -2,7 +2,7 @@
   "name": "job-digest-app",
   "private": true,
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "description": "Local dashboard app for the International Development Personal DevJob Digest plugin. Runs entirely on your machine; shells out to Claude Code for all AI work.",
   "scripts": {
