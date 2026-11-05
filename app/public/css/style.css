@@ -1,0 +1,614 @@
+/* job-digest dashboard
+   One system, two themes (light default, dark via [data-theme="dark"]).
+   Direction: saturated two-stop gradient cards (one per category, constant
+   across both themes) on a calm neutral ground — warm cream in light,
+   deep violet with ambient glow in dark. Montserrat for display/numbers,
+   Inter for body — both from the house font list. No gradient text, no
+   icon-in-tinted-circle decoration; color carries category identity and
+   status, not chrome. */
+
+:root {
+  --ground: #faf6ef;
+  --ground-2: #faf6ef;
+  --panel: #ffffff;
+  --panel-border: #ece3d4;
+  --rule: #ece3d4;
+  --ink: #1a1a1a;
+  --muted: #7d7568;
+  --faint: #a89d8a;
+  --control-border: #d8cdb8;
+  --control-bg: #ffffff;
+
+  --accent: #c24d7a;
+  --accent-bg: #fde7f0;
+
+  --positive: #1f8a6e;
+  --positive-bg: #e4f5ef;
+  --danger: #dc2626;
+  --danger-bg: #fbe2e2;
+  --negative: #d6396a;
+  --negative-bg: #fbe4ea;
+  --warning: #b9740f;
+  --warning-bg: #fbeedd;
+  --ochre: #c17f1a;
+  --ochre-bg: #f3deab;
+  --neutral-bg: #efe9dc;
+  --neutral-ink: #5c5547;
+
+  --grad-digest: linear-gradient(135deg, #f2795a, #e14a7a);
+  --grad-saved: linear-gradient(135deg, #2e3a6b, #5b4fd1);
+  --grad-apps: linear-gradient(135deg, #1f9c82, #3fc7b4);
+  --grad-cv: linear-gradient(135deg, #d98a2e, #f2b33d);
+  --grad-profile: linear-gradient(135deg, #2e6bb0, #4a9fe0);
+  --grad-home: linear-gradient(135deg, #6b3fa0, #9b6fd6);
+  --shadow-digest: rgba(225, 74, 122, .4);
+  --shadow-saved: rgba(91, 79, 209, .35);
+  --shadow-apps: rgba(63, 199, 180, .35);
+  --shadow-cv: rgba(242, 179, 61, .35);
+  --shadow-profile: rgba(74, 159, 224, .4);
+
+  /* The app's one button identity, everywhere outside the wizard (which has
+     its own fixed teal-card/purple-glow look): yellow fill, teal glow. */
+  --grad-button: linear-gradient(135deg, #fff9c4, #fff176);
+  --button-ink: #5c4a00;
+  --shadow-button: rgba(63, 199, 180, .55);
+
+  /* Pastel per-page glow for panels, reusing each page's brand hue at low
+     opacity, plus a matching ink for titles on a white card. */
+  --glow-digest: rgba(225, 74, 122, .22); --title-digest: #c0355f;
+  --glow-saved: rgba(91, 79, 209, .2); --title-saved: #4a3fb0;
+  --glow-apps: rgba(63, 199, 180, .22); --title-apps: #157a62;
+  --glow-cv: rgba(242, 179, 61, .25); --title-cv: #a66a00;
+  --glow-profile: rgba(74, 159, 224, .22); --title-profile: #1f5c96;
+  --glow-home: rgba(149, 112, 219, .2); --title-home: #6b3fa0; --shadow-home: rgba(149, 112, 219, .4);
+
+  --radius-card: 22px;
+  --radius-control: 12px;
+  --radius-pill: 999px;
+  --sidebar-width: 224px;
+  --topbar-height: 64px;
+  --gap: 16px;
+  --pad: 22px;
+  --control-height: 40px;
+
+  --fs-title: 22px;
+  --fs-section: 16px;
+  --fs-kpi: 24px;
+  --fs-body: 14px;
+  --fs-small: 12px;
+}
+
+[data-theme="dark"] {
+  --ground: #241c47;
+  --ground-2: #33265c;
+  --panel: rgba(255, 255, 255, .06);
+  --panel-border: rgba(255, 255, 255, .1);
+  --rule: rgba(255, 255, 255, .08);
+  --ink: #f9f7ff;
+  --muted: #bcb0e3;
+  --faint: #9686c9;
+  --control-border: rgba(255, 255, 255, .18);
+  --control-bg: rgba(255, 255, 255, .05);
+
+  --accent: #ef5fa0;
+  --accent-bg: rgba(239, 95, 160, .16);
+
+  --positive: #3fe0b8;
+  --positive-bg: rgba(63, 224, 184, .15);
+  --danger: #f87171;
+  --danger-bg: rgba(248, 113, 113, .16);
+  --negative: #f0629f;
+  --negative-bg: rgba(240, 98, 159, .16);
+  --warning: #f6bb49;
+  --warning-bg: rgba(246, 187, 73, .16);
+  --ochre: #e0ad4e;
+  --ochre-bg: rgba(224, 173, 78, .22);
+  --neutral-bg: rgba(255, 255, 255, .08);
+  --neutral-ink: #d9d0f2;
+
+  --glow-digest: rgba(225, 74, 122, .3); --title-digest: #ff8fb8;
+  --glow-saved: rgba(91, 79, 209, .3); --title-saved: #b3a6f5;
+  --glow-apps: rgba(63, 199, 180, .3); --title-apps: #5ef0d4;
+  --glow-cv: rgba(242, 179, 61, .32); --title-cv: #ffd166;
+  --glow-profile: rgba(74, 159, 224, .32); --title-profile: #8cc4f0;
+  --glow-home: rgba(149, 112, 219, .32); --title-home: #c3a6f0; --shadow-home: rgba(149, 112, 219, .5);
+}
+
+* { box-sizing: border-box; }
+
+/* Several containers here (.shell, .wizard-overlay, .browse-shell) declare
+   their own `display` for layout. A plain CSS class always beats the
+   browser's built-in [hidden] rule on specificity, so without this, setting
+   el.hidden = true in JS silently does nothing — the element stays visible.
+   This was lost in an earlier rewrite of this file; restored because it's
+   load-bearing for every hidden/show toggle in the app (wizard, browse
+   preview, dashboard shell). */
+[hidden] { display: none !important; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  background: var(--ground);
+  transition: background-color .2s ease, color .2s ease;
+}
+
+[data-theme="dark"] body {
+  background:
+    radial-gradient(900px 600px at 80% -10%, rgba(155, 124, 245, .32), transparent 60%),
+    radial-gradient(700px 500px at 105% 45%, rgba(240, 98, 159, .22), transparent 60%),
+    radial-gradient(650px 500px at -8% 90%, rgba(43, 224, 180, .18), transparent 60%),
+    linear-gradient(160deg, var(--ground), var(--ground-2) 70%);
+  background-attachment: fixed;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* ---- Shell ---- */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--topbar-height) 1fr;
+  grid-template-areas: "sidebar topbar" "sidebar main";
+  height: 100vh;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  color: #fff;
+  background:
+    radial-gradient(ellipse 520px 320px at 25% 88%, rgba(255, 255, 255, .09), transparent 60%),
+    radial-gradient(ellipse 420px 280px at 75% 100%, rgba(20, 220, 190, .18), transparent 60%),
+    linear-gradient(165deg, #3a2d78 0%, #4a3a93 28%, #2d6f94 68%, #0fa093 100%);
+}
+
+.product-mark { display: flex; align-items: center; gap: 10px; padding: 0 4px 28px; }
+.product-mark .mark {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  flex: none;
+}
+.product-mark .mark svg { width: 24px; height: 24px; }
+.product-mark .name { font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 17px; color: #fff; }
+
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav a {
+  display: flex; align-items: center; gap: 12px;
+  min-height: 44px; padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 15px; font-weight: 600;
+  color: rgba(255, 255, 255, .8);
+  background: transparent;
+  box-shadow: none;
+  transition: background .15s ease, color .15s ease;
+}
+.nav a:hover { text-decoration: none; background: rgba(255, 255, 255, .08); color: #fff; }
+.nav a svg { width: 18px; height: 18px; stroke: currentColor; fill: none; flex: none; }
+
+/* Only the active page gets a solid white pill — every other item stays
+   flat on the gradient, so the one place you are reads unmistakably. */
+.nav a.active { background: #fff; color: #342a6e; font-weight: 700; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .35); }
+.nav a.active:hover { background: #fff; }
+
+.sidebar-footer { margin-top: auto; padding-top: 16px; font-size: 12px; color: rgba(255, 255, 255, .65); }
+.sidebar-edit-btn {
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 16px; height: 48px; border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, .28); color: #fff; font-weight: 700; font-size: 15px;
+  border: none; cursor: pointer; text-decoration: none;
+}
+.sidebar-edit-btn:hover { background: rgba(0, 0, 0, .4); text-decoration: none; }
+
+.topbar {
+  grid-area: topbar;
+  border-bottom: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  gap: 16px;
+}
+.topbar-title-group { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.topbar h1 { font-family: "Montserrat", sans-serif; font-size: var(--fs-title); font-weight: 700; margin: 0; }
+.topbar .count-chip-topbar { font-size: 13px; color: var(--muted); background: var(--neutral-bg); border-radius: var(--radius-pill); padding: 3px 12px; font-weight: 700; flex: none; }
+.topbar .freshness { font-size: var(--fs-small); color: var(--faint); display: flex; align-items: center; gap: 12px; flex: none; }
+
+.theme-toggle, .icon-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex: none;
+}
+.theme-toggle svg, .icon-btn svg { width: 16px; height: 16px; stroke: var(--ink); fill: none; stroke-width: 1.8; }
+
+/* "Run now" is the one teal→green gradient pill in the whole app — it's the
+   single most important action on the page, worth a distinct identity from
+   every other pastel-wash button. */
+.btn-run-now {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: var(--control-height); padding: 0 20px;
+  border-radius: var(--radius-pill); border: none; cursor: pointer;
+  background: linear-gradient(180deg, #3d5a96, #2aa3a0);
+  color: #fff; font-size: 14px; font-weight: 700;
+  box-shadow: 0 8px 20px -8px rgba(42, 120, 150, .55);
+}
+.btn-run-now:hover { filter: brightness(1.05); }
+.btn-run-now:disabled { opacity: .6; cursor: default; }
+.btn-run-now svg { width: 15px; height: 15px; stroke: #fff; fill: none; stroke-width: 2; flex: none; }
+
+/* ---- Search / filter bar (list-style views) ---- */
+
+.filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.filter-bar input[type="search"] {
+  flex: 1; min-width: 200px; height: 40px; padding: 0 14px;
+  border: 1px solid var(--control-border); border-radius: var(--radius-pill);
+  background: var(--control-bg); color: var(--ink); font-size: 14px;
+}
+.filter-bar select {
+  height: 40px; padding: 0 14px;
+  border: 1px solid var(--control-border); border-radius: var(--radius-pill);
+  background: var(--control-bg); color: var(--ink); font-size: 14px; font-weight: 600;
+}
+
+/* ---- Group filter tabs (Job digest: view by employer group) ---- */
+.group-filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.group-filter-btn {
+  height: 38px; padding: 0 16px;
+  border: 1px solid var(--control-border); border-radius: var(--radius-pill);
+  background: var(--control-bg); color: var(--ink);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.group-filter-btn.active { background: var(--title-digest); border-color: var(--title-digest); color: #fff; }
+.group-filter select {
+  height: 38px; padding: 0 14px; margin-left: auto;
+  border: 1px solid var(--control-border); border-radius: var(--radius-pill);
+  background: var(--control-bg); color: var(--ink); font-size: 13px; font-weight: 600;
+}
+
+.main { grid-area: main; padding: 36px 32px 64px; max-width: 1204px; overflow-y: auto; }
+.screen-subtitle { font-size: 14px; color: var(--muted); margin: 4px 0 0; }
+
+/* ---- Browse-before-signup shell (no sidebar) ---- */
+
+.browse-shell { min-height: 100vh; background: var(--ground); }
+.browse-shell .topbar {
+  min-height: 96px;
+  background: var(--grad-digest);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  box-shadow: 0 0 80px -20px var(--shadow-digest);
+}
+.browse-shell .topbar h1 { font-family: "Montserrat", sans-serif; font-size: 26px; font-weight: 800; margin: 0; color: #fff; }
+.browse-shell .topbar .btn.primary { background: #fff; color: #c0355f; box-shadow: 0 8px 20px -6px rgba(0, 0, 0, .3); }
+.browse-shell .main { padding: 36px 32px 64px; max-width: 900px; margin: 0 auto; }
+.browse-shell .panel { position: relative; overflow: hidden; padding-top: calc(var(--pad) + 4px); }
+.browse-shell .panel::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--grad-apps); }
+
+/* ---- KPI tiles (home screen) ----
+   Two-tone split card: a darker solid icon strip on the left, a lighter
+   gradient body on the right carrying the label + value. The four tiles
+   read as one purple-to-amber spectrum left to right. */
+
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); margin: 24px 0 32px; }
+.kpi-tile {
+  display: flex;
+  align-items: stretch;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  cursor: pointer;
+  color: #fff;
+  transition: transform .12s ease;
+}
+.kpi-tile:hover { transform: translateY(-2px); }
+.kpi-tile .kpi-icon {
+  flex: none;
+  width: 56px;
+  display: flex; align-items: center; justify-content: center;
+}
+.kpi-tile .kpi-icon svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 1.7; }
+.kpi-tile .kpi-body {
+  flex: 1;
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 8px; justify-content: center;
+}
+.kpi-tile .kpi-label { font-size: 13px; color: rgba(255, 255, 255, .92); font-weight: 600; }
+.kpi-tile .kpi-value { font-family: "Montserrat", sans-serif; font-size: 32px; font-weight: 700; line-height: 1; }
+.kpi-tile.spectrum-1 { box-shadow: 0 14px 34px -12px rgba(69, 58, 107, .5); }
+.kpi-tile.spectrum-1 .kpi-icon { background: #453a6b; }
+.kpi-tile.spectrum-1 .kpi-body { background: linear-gradient(90deg, #5b4c87, #7664a0); }
+.kpi-tile.spectrum-2 { box-shadow: 0 14px 34px -12px rgba(94, 51, 80, .5); }
+.kpi-tile.spectrum-2 .kpi-icon { background: #5e3350; }
+.kpi-tile.spectrum-2 .kpi-body { background: linear-gradient(90deg, #7a4566, #9c5c7a); }
+.kpi-tile.spectrum-3 { box-shadow: 0 14px 34px -12px rgba(138, 59, 72, .5); }
+.kpi-tile.spectrum-3 .kpi-icon { background: #8a3b48; }
+.kpi-tile.spectrum-3 .kpi-body { background: linear-gradient(90deg, #b14f5c, #d97a82); }
+.kpi-tile.spectrum-4 { box-shadow: 0 14px 34px -12px rgba(147, 90, 34, .5); }
+.kpi-tile.spectrum-4 .kpi-icon { background: #935a22; }
+.kpi-tile.spectrum-4 .kpi-body { background: linear-gradient(90deg, #c9823f, #e0a868); }
+
+/* ---- Panels / cards ---- */
+
+.panel { background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius-card); padding: var(--pad); overflow: hidden; }
+
+/* The header is a full-bleed colored bar across the top of the card, not
+   title text floating on plain white — breaks up pages that were otherwise
+   mostly blank white space, and reinforces each page's brand hue. */
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: calc(-1 * var(--pad)) calc(-1 * var(--pad)) var(--pad) calc(-1 * var(--pad));
+  padding: 16px var(--pad);
+  background: var(--neutral-bg);
+}
+.panel-header h2 { font-family: "Montserrat", sans-serif; font-size: var(--fs-section); font-weight: 700; margin: 0; }
+.panel-header-title { display: flex; align-items: center; gap: 12px; }
+.panel-header-icon {
+  flex: none;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255, 255, 255, .22);
+  display: flex; align-items: center; justify-content: center;
+}
+.panel-header-icon svg { width: 17px; height: 17px; stroke: #fff; fill: none; stroke-width: 1.8; }
+
+/* Every page carries its own brand hue from Home through to its own cards:
+   a soft glow behind each panel, and a vivid gradient header bar (not a pale
+   tint — a tint blended into the cream page background and disappeared). */
+.view-home .panel { box-shadow: 0 0 50px -8px var(--glow-home); }
+.view-home .panel-header { background: linear-gradient(135deg, #724a8f, #b8568c); }
+.view-home .panel-header h2 { color: #fff; }
+.view-digest .panel { box-shadow: 0 0 50px -8px var(--glow-digest); }
+.view-digest .panel-header { background: var(--grad-digest); }
+.view-digest .panel-header h2 { color: #fff; }
+.view-saved .panel { box-shadow: 0 0 50px -8px var(--glow-saved); }
+.view-saved .panel-header { background: var(--grad-saved); }
+.view-saved .panel-header h2 { color: #fff; }
+.view-applications .panel { box-shadow: 0 0 50px -8px var(--glow-apps); }
+.view-applications .panel-header { background: var(--grad-apps); }
+.view-applications .panel-header h2 { color: #fff; }
+.view-cv-letters .panel { box-shadow: 0 0 50px -8px var(--glow-cv); }
+.view-cv-letters .panel-header { background: linear-gradient(135deg, #0e7490, #22d3ee); }
+.view-cv-letters .panel-header h2 { color: #fff; }
+.view-profile .panel { box-shadow: 0 0 50px -8px var(--glow-profile); }
+.view-profile .panel-header { background: var(--grad-profile); }
+.view-profile .panel-header h2 { color: #fff; }
+/* The schedule panel controls real recurring cost/usage — it needs to stand
+   out from the neutral white panels around it, not blend in. */
+.view-profile .schedule-panel { background: var(--warning-bg); border: 1.5px solid var(--warning); box-shadow: 0 0 60px -10px var(--warning); }
+.view-profile .schedule-panel .panel-header { background: linear-gradient(135deg, #b9740f, #e0ad4e); }
+.view-profile .schedule-panel .panel-header h2 { color: #fff; }
+.panel + .panel { margin-top: var(--gap); }
+.count-chip { font-size: 12px; color: var(--accent); background: var(--accent-bg); border-radius: var(--radius-pill); padding: 3px 10px; font-weight: 700; }
+
+/* ---- Role cards ---- */
+
+.role-row {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-left: 4px solid var(--card-accent, var(--accent));
+  border-radius: 16px;
+  padding: 18px 22px;
+  margin-bottom: 14px;
+}
+.role-row:last-child { margin-bottom: 0; }
+.role-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.role-title-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.role-title-line svg { width: 17px; height: 17px; stroke: var(--card-accent, var(--accent)); fill: none; stroke-width: 2; flex: none; }
+.role-title { font-size: 16px; font-weight: 700; }
+.role-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.role-why { font-size: 13px; color: var(--faint); margin-top: 8px; }
+
+.role-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+.role-actions-spacer { flex: 1 1 16px; min-width: 4px; }
+.role-actions a, .role-actions button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  color: var(--accent); background: var(--accent-bg); border: none;
+  border-radius: 999px; cursor: pointer; padding: 9px 16px;
+  font-size: 13px; font-weight: 700; white-space: nowrap; text-decoration: none;
+}
+.role-actions a:hover, .role-actions button:hover { text-decoration: none; filter: brightness(1.04); }
+.role-actions select {
+  border: 1px solid var(--control-border); background: var(--control-bg); color: var(--ink);
+  border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.role-actions svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* Each action keeps its own color identity everywhere it appears, reusing the
+   same soft pastel-wash tokens already used for the sidebar nav pills and
+   per-page panel glows — subtler than a solid saturated gradient fill, and
+   already proven consistent with the rest of the app. */
+.role-actions a { background: linear-gradient(180deg, #3d5a90, #2d7390); color: #fff; box-shadow: 0 6px 16px -8px rgba(45, 90, 140, .5); } /* View listing */
+.role-actions [data-action="save"] { background: var(--glow-apps); color: var(--title-apps); box-shadow: 0 0 22px -4px rgba(255, 209, 102, .85); }
+.role-actions [data-action="not_qualifying"] { background: var(--glow-digest); color: var(--title-digest); box-shadow: 0 0 20px -8px var(--glow-digest); }
+.role-actions [data-action="tailor-cv"] { background: linear-gradient(135deg, #1f8f7a, #2ecc9a); color: #fff; box-shadow: 0 6px 16px -8px rgba(31, 143, 122, .5); }
+.role-actions [data-action="reword"] { background: var(--grad-saved); color: #fff; box-shadow: 0 6px 16px -8px var(--shadow-saved); }
+.role-actions .action-danger { background: var(--glow-digest); color: var(--title-digest); box-shadow: 0 0 20px -8px var(--glow-digest); }
+.role-actions .draft-open-btn { background: linear-gradient(135deg, #1a9e5c, #3ecf7a); color: #fff; box-shadow: 0 6px 16px -8px rgba(26, 158, 92, .5); }
+/* Mark Applied starts neutral like the rest — it only turns green once the
+   click actually registers the application, so color reflects real state
+   rather than being colored before anything happened. An already-applied
+   status chip (no click target, just a fact) reuses the same green. */
+.role-actions .action-positive, .role-actions .status-chip.applied {
+  color: var(--neutral-ink); background: var(--neutral-bg); box-shadow: none;
+}
+.role-actions .action-positive.is-applied, .role-actions .status-chip.applied.is-applied {
+  background: var(--glow-apps); color: var(--title-apps); box-shadow: 0 0 20px -8px var(--glow-apps);
+}
+.status-chip { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+
+/* Per-view left-accent colors for the card border + bookmark/document icon. */
+.view-digest .role-row { --card-accent: var(--title-digest); }
+.view-saved .role-row { --card-accent: var(--title-apps); }
+.view-applications .role-row { --card-accent: var(--title-apps); }
+.view-cv-letters .role-row { --card-accent: var(--title-cv); }
+.view-home .role-row { --card-accent: var(--title-apps); }
+
+/* ---- Pills ---- */
+
+.pill { display: inline-flex; align-items: center; height: 22px; padding: 0 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.pill.positive { background: var(--positive-bg); color: var(--positive); }
+.pill.negative { background: var(--negative-bg); color: var(--negative); }
+.pill.warning { background: var(--warning-bg); color: var(--warning); }
+.pill.accent { background: var(--accent-bg); color: var(--accent); }
+.pill.neutral { background: var(--neutral-bg); color: var(--neutral-ink); }
+
+/* ---- Buttons ---- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  height: var(--control-height);
+  padding: 0 18px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid #fff176;
+  background: #fffde7;
+  color: var(--button-ink);
+  font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 22px -6px var(--shadow-button);
+}
+.btn:hover { border-color: #f6bb49; box-shadow: 0 0 30px -4px var(--shadow-button); }
+.btn.primary {
+  background: var(--grad-button); color: var(--button-ink); border: none;
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .25), 0 0 30px -6px var(--shadow-button);
+}
+.btn.primary:hover { filter: brightness(1.03); }
+.btn:disabled { opacity: .5; cursor: default; box-shadow: none; }
+
+/* ---- Forms ---- */
+
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.field label.btn { display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0; font-size: 14px; }
+.field .hint { font-size: 12px; color: var(--faint); margin-top: 6px; }
+.field input[type="text"], .field input[type="number"], .field input[type="time"], .field select, .field textarea {
+  width: 100%; background: var(--control-bg); border: 1px solid var(--control-border);
+  border-radius: var(--radius-control); color: var(--ink); padding: 0 12px; height: 40px;
+}
+.field textarea { height: auto; padding: 10px 12px; min-height: 90px; resize: vertical; font-family: inherit; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+
+.upload-box { border: 2px dashed var(--control-border); border-radius: var(--radius-control); padding: 20px; text-align: center; color: var(--muted); font-size: 13px; cursor: pointer; }
+.upload-box:hover { border-color: var(--accent); }
+.file-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--positive-bg); color: var(--positive); border-radius: var(--radius-pill); padding: 4px 12px; font-size: 13px; margin: 4px 6px 0 0; font-weight: 600; }
+.file-chip .check { stroke: var(--positive); }
+
+/* ---- Wizard ----
+   Fixed design, independent of the light/dark toggle (there is no toggle
+   here): cream page, a heavy purple ambient glow behind the card, and the
+   card itself in the app's teal gradient — not the ground going dark. */
+
+.wizard-overlay {
+  position: fixed; inset: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  background: #faf6ef;
+}
+.wizard-card {
+  width: 560px; max-width: calc(100vw - 48px);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--grad-apps);
+  border: none;
+  color: #fff;
+  box-shadow:
+    0 0 160px 40px rgba(124, 77, 230, .55),
+    0 0 260px 80px rgba(124, 77, 230, .3),
+    0 24px 60px -20px rgba(0, 0, 0, .35);
+}
+.wizard-step h1 { font-family: "Montserrat", sans-serif; font-size: 26px; margin: 0 0 6px; font-weight: 700; color: #fff; }
+.wizard-step p.lead { font-size: 14px; margin: 0 0 24px; color: rgba(255, 255, 255, .85); }
+.wizard-progress { font-size: 12px; margin-bottom: 8px; font-weight: 700; color: rgba(255, 255, 255, .7); }
+.wizard-card .field label { color: #fff; }
+.wizard-card .field .hint { color: rgba(255, 255, 255, .75); }
+.wizard-card .field input[type="text"],
+.wizard-card .field input[type="number"],
+.wizard-card .field input[type="time"],
+.wizard-card .field select,
+.wizard-card .field textarea {
+  background: rgba(0, 0, 0, .18);
+  border-color: rgba(255, 255, 255, .35);
+  color: #fff;
+}
+.wizard-card .field input::placeholder, .wizard-card .field textarea::placeholder { color: rgba(255, 255, 255, .55); }
+.wizard-card .upload-box { background: rgba(0, 0, 0, .12); border-color: rgba(255, 255, 255, .35); color: rgba(255, 255, 255, .85); }
+.wizard-card .file-chip { background: linear-gradient(135deg, #a98cf5, #7c4de6); color: #fff; }
+.wizard-card .file-chip .check { stroke: #4ade80; }
+.file-chip .check { width: 14px; height: 14px; fill: none; stroke-width: 3; flex: none; }
+.wizard-card .btn {
+  background: rgba(255, 255, 255, .16);
+  border: 1.5px solid rgba(255, 255, 255, .6);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 34px -6px rgba(124, 77, 230, .7);
+}
+.wizard-card .btn:hover { background: rgba(255, 255, 255, .26); box-shadow: 0 0 44px -4px rgba(124, 77, 230, .85); }
+.wizard-card .btn:disabled { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .25); box-shadow: none; }
+.wizard-card .btn.primary, .wizard-card #wiz-browse {
+  background: linear-gradient(135deg, #fff9c4, #fff176);
+  color: #5c4a00;
+  border: none;
+  box-shadow: 0 10px 26px -8px rgba(0, 0, 0, .4), 0 0 40px -6px rgba(255, 241, 118, .8);
+}
+.wizard-card .btn.primary:disabled, .wizard-card #wiz-browse:disabled {
+  background: rgba(255, 255, 255, .08);
+  border-color: rgba(255, 255, 255, .25);
+  box-shadow: none;
+  color: rgba(255, 255, 255, .5);
+}
+.wizard-card .btn.primary:hover, .wizard-card #wiz-browse:hover {
+  background: linear-gradient(135deg, #fffde7, #fff176);
+  box-shadow: 0 10px 26px -8px rgba(0, 0, 0, .4), 0 0 52px -4px rgba(255, 241, 118, .95);
+}
+.wizard-actions { display: flex; justify-content: space-between; margin-top: 28px; }
+
+/* ---- Empty / zero states ---- */
+
+.empty-note { padding: 18px; text-align: center; color: var(--faint); font-size: 13px; border: 2px dashed var(--rule); border-radius: var(--radius-control); }
+
+/* Status box for long-running inline actions (Tailor CV, Draft Cover Letter) —
+   ochre, not the plain neutral tan, so it reads as "working/attention" rather
+   than blending into the page like a quiet note. */
+.draft-output {
+  margin-top: 10px; white-space: pre-wrap; font-size: 13px; color: var(--ink);
+  background: var(--ochre-bg); border: 1.5px solid var(--ochre);
+  border-radius: 10px; padding: 14px;
+}
+.draft-output a { color: var(--ochre); font-weight: 700; }
+.draft-output .draft-open-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: 999px; padding: 6px 14px;
+  background: var(--ochre); color: #fff; font-weight: 700; font-size: 13px; cursor: pointer;
+}
+.draft-output .draft-open-btn:hover { filter: brightness(1.05); }
+.draft-output .draft-open-btn:disabled { opacity: .6; cursor: default; }
+.draft-output .progress-line { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--ochre); }
+.draft-output .progress-line .spinner {
+  width: 14px; height: 14px; border-radius: 50%; flex: none;
+  border: 2px solid var(--ochre); border-top-color: transparent;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Phone ---- */
+
+@media (max-width: 760px) {
+  .shell { grid-template-columns: 1fr; grid-template-rows: 56px 1fr; grid-template-areas: "topbar" "main"; }
+  .sidebar { position: fixed; inset: 0; z-index: 20; display: none; }
+  .sidebar.open { display: flex; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .main { padding: 20px 16px 48px; }
+  .field-row { grid-template-columns: 1fr; }
+}

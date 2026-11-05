@@ -1,0 +1,31 @@
+# Dependencies
+app/node_modules/
+node_modules/
+
+# Local app state — never shared, points at the user's private workspace
+app/.config.json
+app/*.log
+app/*.pid
+
+# Electron build output
+dist/
+out/
+
+# Real per-user data, in case the app is ever run from inside this repo
+# folder by mistake — the private workspace should always live elsewhere
+roles.json
+applications.json
+profile.md
+settings.json
+digest-run-log.txt
+last-run-log.txt
+cover-letters/
+cv-tailored/
+
+# Local dev-tool scratch directories
+.taste-skill/
+.impeccable/
+
+# OS cruft
+.DS_Store
+Thumbs.db

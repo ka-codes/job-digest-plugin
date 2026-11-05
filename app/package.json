@@ -1,0 +1,19 @@
+{
+  "name": "job-digest-app",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Local dashboard app for the International Development Personal Job Digest plugin. Runs entirely on your machine; shells out to Claude Code for all AI work.",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mammoth": "^1.13.0",
+    "multer": "^2.0.0",
+    "pdf-parse": "^2.4.5",
+    "word-extractor": "^1.0.4",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  }
+}
