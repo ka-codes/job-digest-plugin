@@ -92,7 +92,7 @@ export function startWizard(onComplete) {
       ${progress()}
       <div class="wizard-step">
         <h1>Checking for Claude Code</h1>
-        <p class="lead">Job Digest does all its AI work — job search, fit scoring, tailored CVs and cover letters — through Claude Code, installed and signed in with your own account. Checking…</p>
+        <p class="lead">DevJob Digest does all its AI work — job search, fit scoring, tailored CVs and cover letters — through Claude Code, installed and signed in with your own account. Checking…</p>
         <div class="hint" id="wiz-claude-status">Checking…</div>
       </div>
       ${actions(true, 'Continue')}`;

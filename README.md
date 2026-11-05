@@ -1,6 +1,6 @@
-# Job Digest
+# DevJob Digest
 
-**International Development Personal Job Digest** — a free, local-first desktop app that searches senior international-development and AI-for-good roles, scores fit against your real CV, tracks your applications, and drafts tailored CVs and cover letters.
+**International Development Personal DevJob Digest** — a free, local-first desktop app that searches senior international-development and AI-for-good roles, scores fit against your real CV, tracks your applications, and drafts tailored CVs and cover letters.
 
 Everything runs on your own machine. Your CV, preferences, saved jobs, and application history never leave it. The app uses your own existing [Claude Code](https://claude.com/claude-code) installation for all AI work, so there's no separate API key to manage and no usage cost to anyone but you.
 
@@ -20,12 +20,12 @@ Everything runs on your own machine. Your CV, preferences, saved jobs, and appli
 ## Install
 
 1. Go to [Releases](https://github.com/ka-codes/job-digest-plugin/releases) and download the latest installer for your OS:
-   - Windows: `Job-Digest-Setup-x.x.x.exe`
-   - macOS: `Job-Digest-x.x.x.dmg`
+   - Windows: `DevJob Digest Setup x.x.x.exe`
+   - macOS: `DevJob Digest-x.x.x.dmg`
 2. Run the installer.
    - **Windows:** if SmartScreen warns "Windows protected your PC," click **More info → Run anyway**. This is because the app isn't code-signed (code-signing certificates cost money and aren't required for free/open-source tools) — not a sign of anything wrong.
    - **macOS:** if Gatekeeper blocks it as "unidentified developer," right-click (or Control-click) the app → **Open**, then confirm. Same reason as above.
-3. Launch **Job Digest** from your Start Menu / Applications folder like any other app.
+3. Launch **DevJob Digest** from your Start Menu / Applications folder like any other app.
 4. The first-run wizard checks that Claude Code is installed, then walks you through uploading your CV, setting preferences, and choosing a refresh schedule.
 
 ## Running from source

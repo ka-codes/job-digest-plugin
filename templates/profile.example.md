@@ -107,6 +107,7 @@ Starter list for international development — edit, remove, or add your own.
 - ReliefWeb (humanitarian jobs, run by UN OCHA) — https://reliefweb.int/jobs
 - Devex (leading global development jobs board) — https://www.devex.com/jobs/search
 - Impactpool (UN agencies, INGOs & development orgs) — https://www.impactpool.org/jobs
+- UN Jobs (unjobs.org — aggregates many UN/multilateral postings beyond this list's named employers) — https://unjobs.org/
 - DevelopmentAid (large international development jobs database) — https://www.developmentaid.org/jobs/search
 - UN Jobnet (UN system jobs) — https://www.unjobnet.org/jobs
 - GlobalJobs.org (international affairs, NGOs, UN, think tanks) — https://www.globaljobs.org/

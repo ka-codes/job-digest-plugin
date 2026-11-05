@@ -1,4 +1,4 @@
-# Contributing to Job Digest
+# Contributing to DevJob Digest
 
 ## Running from source
 

@@ -84,7 +84,7 @@ async function createWindow() {
     height: 860,
     minWidth: 960,
     minHeight: 640,
-    title: 'Job Digest',
+    title: 'DevJob Digest',
     autoHideMenuBar: true,
   });
   win.loadURL(SERVER_URL);
@@ -115,11 +115,11 @@ function createTrayIcon() {
 
 function createTray() {
   tray = new Tray(createTrayIcon());
-  tray.setToolTip('Job Digest');
+  tray.setToolTip('DevJob Digest');
   tray.setContextMenu(
     Menu.buildFromTemplate([
       {
-        label: 'Open Job Digest',
+        label: 'Open DevJob Digest',
         click: () => {
           if (win) win.show();
           else createWindow();
