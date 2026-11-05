@@ -519,6 +519,12 @@ async function renderApplications() {
     .map((r) => applicationRow(r.id, r.title, r.org, 'not_applied'))
     .join('');
 
+  // Every stage below "Saved, not yet applied" can be set directly from any
+  // saved role, not just by walking it through the per-row status dropdown
+  // (which can be unreliable to operate) — e.g. a rejection that arrives
+  // before you'd gotten around to marking it applied.
+  const savedRoles = roles.filter((r) => r.digest_status === 'saved');
+
   const otherGroups = APPLICATION_STATUSES.filter((s) => s !== 'not_applied').map((status) => {
     const inGroup = apps.filter((a) => a.status === status);
     const rows = inGroup
@@ -530,10 +536,22 @@ async function renderApplications() {
         return applicationRow(a.role_id, title, org, status, extra);
       })
       .join('');
+    const pickerOptions = savedRoles
+      .filter((r) => !inGroup.some((a) => a.role_id === r.id))
+      .map((r) => `<option value="${esc(r.id)}">${esc(r.title)} — ${esc(r.org)}</option>`)
+      .join('');
+    const picker = `
+      <div class="field-row" style="margin-top:10px;">
+        <select data-add-to-status="${status}" style="flex:1;">
+          <option value="">Add a saved job directly to ${STATUS_LABELS[status]}…</option>
+          ${pickerOptions}
+        </select>
+      </div>`;
     return `
       <div class="panel">
         <div class="panel-header"><h2>${STATUS_LABELS[status]}</h2><span class="count-chip">${inGroup.length}</span></div>
         ${inGroup.length ? rows : emptyNote('Nothing here.')}
+        ${picker}
       </div>`;
   });
 
@@ -854,6 +872,14 @@ function bindViewActions(root, view) {
     select.addEventListener('change', async () => {
       const roleId = select.closest('.role-row').dataset.roleId;
       await api.post('/applications', { roleId, status: select.value });
+      navigate('applications');
+    });
+  });
+
+  root.querySelectorAll('[data-add-to-status]').forEach((select) => {
+    select.addEventListener('change', async () => {
+      if (!select.value) return;
+      await api.post('/applications', { roleId: select.value, status: select.dataset.addToStatus });
       navigate('applications');
     });
   });
