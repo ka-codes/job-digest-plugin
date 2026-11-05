@@ -157,6 +157,7 @@ export function startWizard(onComplete) {
     nextBtn.disabled = true; // explicit: Continue only unlocks once the folder step is actually done
 
     function updateCreateLabel() {
+      createBtn.classList.remove('success');
       createBtn.textContent = pathInput.value.trim() ? 'Use This Folder' : 'Create';
     }
     pathInput.addEventListener('input', updateCreateLabel);
@@ -203,7 +204,6 @@ export function startWizard(onComplete) {
       createBtn.classList.add('success');
       status.textContent = `✓ Folder ready at ${path}`;
       nextBtn.disabled = false;
-      setTimeout(() => { createBtn.classList.remove('success'); updateCreateLabel(); }, 1500);
     });
 
     document.getElementById('wiz-next').addEventListener('click', async () => {
