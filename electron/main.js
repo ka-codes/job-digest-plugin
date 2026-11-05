@@ -41,8 +41,17 @@ if (!gotLock) {
     // app/server.mjs self-starts (app.listen(...)) the moment it's imported —
     // reused exactly as the source/dev path runs it, no rewrite.
     import('../app/server.mjs');
-    createWindow();
+
+    // Tray persistence (above) only keeps the schedule alive while the app is
+    // already running. Without this, "runs on its own schedule" quietly
+    // assumes the user remembers to reopen it after every reboot/Windows
+    // update restart. Launching at login closes that gap; launching hidden
+    // (via the --hidden arg we pass ourselves) means login doesn't pop a
+    // window open every time — it just starts resident in the tray, same as
+    // if the user had closed the window themselves.
+    app.setLoginItemSettings({ openAtLogin: true, args: ['--hidden'] });
     createTray();
+    if (!process.argv.includes('--hidden')) createWindow();
 
     app.on('activate', () => {
       if (win) win.show();
