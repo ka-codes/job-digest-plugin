@@ -24,7 +24,7 @@ export const getApplications = (dir) => readJSON(dir, 'applications.json', []);
 export const setApplications = (dir, apps) => writeJSON(dir, 'applications.json', apps);
 
 export const getSettings = (dir) =>
-  readJSON(dir, 'settings.json', { frequency: 'daily', time_of_day: '06:00', last_run: null });
+  readJSON(dir, 'settings.json', { frequency: 'daily', time_of_day: '06:00', last_run: null, paused: false });
 export const setSettings = (dir, settings) => writeJSON(dir, 'settings.json', settings);
 
 export function todayISO() {

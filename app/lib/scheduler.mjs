@@ -57,6 +57,7 @@ function tick() {
   if (!workspaceDir) return; // no workspace chosen yet
   if (!readConfig().setupComplete) return; // workspace exists mid-wizard, but setup isn't finished — never run yet
   const settings = getSettings(workspaceDir);
+  if (settings.paused) return;
   if (!isDue(settings)) return;
   runDigestNow(workspaceDir).catch((err) => {
     console.error('[scheduler] digest run failed:', err.message);

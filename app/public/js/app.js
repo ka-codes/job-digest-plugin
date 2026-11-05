@@ -736,17 +736,20 @@ async function renderProfile() {
           <div class="field">
             <label>Frequency</label>
             <select id="pf-frequency">
-              <option value="daily" ${settings.frequency === 'daily' ? 'selected' : ''}>Daily</option>
-              <option value="every-3-days" ${settings.frequency === 'every-3-days' ? 'selected' : ''}>Every 3 days</option>
-              <option value="weekly" ${settings.frequency === 'weekly' ? 'selected' : ''}>Weekly</option>
+              <option value="daily" ${!settings.paused && settings.frequency === 'daily' ? 'selected' : ''}>Daily</option>
+              <option value="every-3-days" ${!settings.paused && settings.frequency === 'every-3-days' ? 'selected' : ''}>Every 3 days</option>
+              <option value="weekly" ${!settings.paused && settings.frequency === 'weekly' ? 'selected' : ''}>Weekly</option>
+              <option value="paused" ${settings.paused ? 'selected' : ''}>Pause scheduled runs</option>
             </select>
           </div>
           <div class="field">
             <label>Time of day</label>
-            <input type="time" id="pf-time" value="${esc(settings.time_of_day || '06:00')}">
+            <input type="time" id="pf-time" value="${esc(settings.time_of_day || '06:00')}" ${settings.paused ? 'disabled' : ''}>
           </div>
         </div>
-        <p class="hint">A thorough run checks every priority employer and aggregator and typically takes 10-15+ minutes of real Claude Code activity. On a subscription plan this draws from the same usage pool as your regular Claude Code sessions, not a separate bill.</p>
+        <p class="hint" id="pf-schedule-hint">${settings.paused
+          ? 'Scheduled runs are paused — use Run now any time to check manually.'
+          : 'A thorough run checks every priority employer and aggregator and typically takes 10-15+ minutes of real Claude Code activity. On a subscription plan this draws from the same usage pool as your regular Claude Code sessions, not a separate bill.'}</p>
         <div style="display:flex; justify-content:flex-end; margin-top:10px;">
           <button class="btn primary" id="pf-save-schedule">Save changes</button>
         </div>
@@ -977,14 +980,29 @@ function bindViewActions(root, view) {
       flashSaved(btn);
     });
 
+    const SCHEDULE_HINT = 'A thorough run checks every priority employer and aggregator and typically takes 10-15+ minutes of real Claude Code activity. On a subscription plan this draws from the same usage pool as your regular Claude Code sessions, not a separate bill.';
+    const PAUSED_HINT = 'Scheduled runs are paused — use Run now any time to check manually.';
+
+    root.querySelector('#pf-frequency').addEventListener('change', (e) => {
+      const paused = e.target.value === 'paused';
+      root.querySelector('#pf-time').disabled = paused;
+      root.querySelector('#pf-schedule-hint').textContent = paused ? PAUSED_HINT : SCHEDULE_HINT;
+    });
+
     root.querySelector('#pf-save-schedule').addEventListener('click', async () => {
       const btn = root.querySelector('#pf-save-schedule');
       btn.disabled = true;
       btn.textContent = 'Saving…';
-      await api.post('/settings', {
-        frequency: root.querySelector('#pf-frequency').value,
-        time_of_day: root.querySelector('#pf-time').value,
-      });
+      const frequencyValue = root.querySelector('#pf-frequency').value;
+      if (frequencyValue === 'paused') {
+        await api.post('/settings', { paused: true });
+      } else {
+        await api.post('/settings', {
+          frequency: frequencyValue,
+          time_of_day: root.querySelector('#pf-time').value,
+          paused: false,
+        });
+      }
       refreshFreshness();
       flashSaved(btn);
     });
