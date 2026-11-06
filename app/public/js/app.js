@@ -738,7 +738,7 @@ async function renderProfile() {
         <div class="field">
           <label>Locations (one per line)</label>
           <textarea id="pf-locations">${esc((prefs.locations || []).join('\n'))}</textarea>
-          <div class="hint">All locations are searched every time — this just sets the default order results are shown in.</div>
+          <div class="hint">A hard filter: roles outside these locations (or not genuinely remote, if "Remote" is listed) are excluded entirely, not just ranked lower. List them in priority order.</div>
         </div>
         <div class="field-row">
           <div class="field"><label>Pay floor</label><input type="text" inputmode="numeric" id="pf-pay-floor" value="${esc(formatThousands(prefs.payFloor))}"></div>

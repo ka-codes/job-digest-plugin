@@ -118,9 +118,11 @@ Starter list for international development — edit, remove, or add your own.
 - ForGood (nonprofit & social impact jobs) — https://forgoodjobs.org/
 
 ## Locations (in priority order)
-<!-- Real places only (cities, or "Remote"). "Hybrid" is not a place — if you
-     list it, it only means hybrid roles based in one of your OTHER listed
-     cities are fine, not that any hybrid role anywhere counts as a match. -->
+<!-- A hard filter, not a preference: roles outside these locations are
+     excluded from the digest entirely, not just ranked lower. Real places
+     only (cities, or "Remote"). "Hybrid" is not a place — if you list it,
+     it only means hybrid roles based in one of your OTHER listed cities are
+     fine, not that any hybrid role anywhere counts as a match. -->
 1.
 2.
 3.
