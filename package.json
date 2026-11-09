@@ -1,7 +1,7 @@
 {
   "name": "job-digest",
   "productName": "DevJob Digest",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "International Development Personal DevJob Digest — a free, local-first desktop app that searches senior international-development/AI-for-good roles, scores fit against your real CV, tracks applications, and drafts tailored CVs and cover letters. Runs entirely on your machine; uses your own Claude Code installation for all AI work.",
   "license": "MIT",
   "author": "ka-codes",
