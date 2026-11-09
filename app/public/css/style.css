@@ -79,39 +79,43 @@
 }
 
 [data-theme="dark"] {
-  --ground: #241c47;
-  --ground-2: #33265c;
-  --panel: rgba(255, 255, 255, .06);
-  --panel-border: rgba(255, 255, 255, .1);
+  /* Near-black neutral ground (not violet) — teal and ochre carry the
+     accent weight instead, per the reference mood: dark glass panels,
+     glowing teal/gold highlights, purple pulled back to a minimal,
+     occasional accent rather than the dominant hue. */
+  --ground: #0b0b10;
+  --ground-2: #141219;
+  --panel: rgba(255, 255, 255, .055);
+  --panel-border: rgba(255, 255, 255, .09);
   --rule: rgba(255, 255, 255, .08);
-  --ink: #f9f7ff;
-  --muted: #bcb0e3;
-  --faint: #9686c9;
-  --control-border: rgba(255, 255, 255, .18);
-  --control-bg: rgba(255, 255, 255, .05);
+  --ink: #f3f5f6;
+  --muted: #a7b0b6;
+  --faint: #767f85;
+  --control-border: rgba(255, 255, 255, .14);
+  --control-bg: rgba(255, 255, 255, .045);
 
-  --accent: #ef5fa0;
-  --accent-bg: rgba(239, 95, 160, .16);
+  --accent: #37e0c4;
+  --accent-bg: rgba(55, 224, 196, .15);
 
   --positive: #3fe0b8;
   --positive-bg: rgba(63, 224, 184, .15);
   --danger: #f87171;
   --danger-bg: rgba(248, 113, 113, .16);
   --negative: #f0629f;
-  --negative-bg: rgba(240, 98, 159, .16);
+  --negative-bg: rgba(240, 98, 159, .14);
   --warning: #f6bb49;
   --warning-bg: rgba(246, 187, 73, .16);
-  --ochre: #e0ad4e;
-  --ochre-bg: rgba(224, 173, 78, .22);
-  --neutral-bg: rgba(255, 255, 255, .08);
-  --neutral-ink: #d9d0f2;
+  --ochre: #f0b429;
+  --ochre-bg: rgba(240, 180, 41, .18);
+  --neutral-bg: rgba(255, 255, 255, .07);
+  --neutral-ink: #c7cdd1;
 
-  --glow-digest: rgba(225, 74, 122, .3); --title-digest: #ff8fb8;
-  --glow-saved: rgba(91, 79, 209, .3); --title-saved: #b3a6f5;
-  --glow-apps: rgba(63, 199, 180, .3); --title-apps: #5ef0d4;
-  --glow-cv: rgba(242, 179, 61, .32); --title-cv: #ffd166;
-  --glow-profile: rgba(74, 159, 224, .32); --title-profile: #8cc4f0;
-  --glow-home: rgba(149, 112, 219, .32); --title-home: #c3a6f0; --shadow-home: rgba(149, 112, 219, .5);
+  --glow-digest: rgba(225, 74, 122, .26); --title-digest: #ff8fb8;
+  --glow-saved: rgba(91, 79, 209, .16); --title-saved: #a79af0;
+  --glow-apps: rgba(55, 224, 196, .3); --title-apps: #5ef0d4;
+  --glow-cv: rgba(240, 180, 41, .3); --title-cv: #ffd166;
+  --glow-profile: rgba(74, 159, 224, .3); --title-profile: #8cc4f0;
+  --glow-home: rgba(149, 112, 219, .16); --title-home: #b3a6f5; --shadow-home: rgba(149, 112, 219, .3);
 }
 
 * { box-sizing: border-box; }
@@ -140,9 +144,9 @@ body {
 
 [data-theme="dark"] body {
   background:
-    radial-gradient(900px 600px at 80% -10%, rgba(155, 124, 245, .32), transparent 60%),
-    radial-gradient(700px 500px at 105% 45%, rgba(240, 98, 159, .22), transparent 60%),
-    radial-gradient(650px 500px at -8% 90%, rgba(43, 224, 180, .18), transparent 60%),
+    radial-gradient(900px 600px at 85% -10%, rgba(55, 224, 196, .22), transparent 60%),
+    radial-gradient(700px 550px at -5% 15%, rgba(240, 180, 41, .14), transparent 60%),
+    radial-gradient(650px 500px at 15% 95%, rgba(149, 112, 219, .1), transparent 60%),
     linear-gradient(160deg, var(--ground), var(--ground-2) 70%);
   background-attachment: fixed;
 }
@@ -300,7 +304,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---- KPI tiles (home screen) ----
    Two-tone split card: a darker solid icon strip on the left, a lighter
    gradient body on the right carrying the label + value. The four tiles
-   read as one purple-to-amber spectrum left to right. */
+   read as one purple-to-amber spectrum left to right (dark mode uses its
+   own teal-blue-to-yellow variant instead — see the dark theme section). */
 
 .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); margin: 24px 0 32px; }
 .kpi-tile {
@@ -338,6 +343,21 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .kpi-tile.spectrum-4 { box-shadow: 0 14px 34px -12px rgba(147, 90, 34, .5); }
 .kpi-tile.spectrum-4 .kpi-icon { background: #935a22; }
 .kpi-tile.spectrum-4 .kpi-body { background: linear-gradient(90deg, #c9823f, #e0a868); }
+
+/* Dark mode gets its own spectrum — teal/blue/yellow only, no purple or
+   magenta/red, per direct request to keep purple minimal in dark mode. */
+[data-theme="dark"] .kpi-tile.spectrum-1 { box-shadow: 0 14px 34px -12px rgba(31, 156, 130, .5); }
+[data-theme="dark"] .kpi-tile.spectrum-1 .kpi-icon { background: #1f9c82; }
+[data-theme="dark"] .kpi-tile.spectrum-1 .kpi-body { background: linear-gradient(90deg, #1f9c82, #3fc7b4); }
+[data-theme="dark"] .kpi-tile.spectrum-2 { box-shadow: 0 14px 34px -12px rgba(31, 127, 160, .5); }
+[data-theme="dark"] .kpi-tile.spectrum-2 .kpi-icon { background: #1f7fa0; }
+[data-theme="dark"] .kpi-tile.spectrum-2 .kpi-body { background: linear-gradient(90deg, #1f7fa0, #3fb0c7); }
+[data-theme="dark"] .kpi-tile.spectrum-3 { box-shadow: 0 14px 34px -12px rgba(46, 107, 176, .5); }
+[data-theme="dark"] .kpi-tile.spectrum-3 .kpi-icon { background: #2e6bb0; }
+[data-theme="dark"] .kpi-tile.spectrum-3 .kpi-body { background: linear-gradient(90deg, #2e6bb0, #4a9fe0); }
+[data-theme="dark"] .kpi-tile.spectrum-4 { box-shadow: 0 14px 34px -12px rgba(201, 138, 46, .5); }
+[data-theme="dark"] .kpi-tile.spectrum-4 .kpi-icon { background: #c98a2e; }
+[data-theme="dark"] .kpi-tile.spectrum-4 .kpi-body { background: linear-gradient(90deg, #c98a2e, #f0b429); }
 
 /* ---- Panels / cards ---- */
 
