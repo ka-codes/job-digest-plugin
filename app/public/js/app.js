@@ -239,12 +239,15 @@ async function renderHome() {
     <button data-action="closed" class="action-danger">${ICON_X}Remove</button>`;
   const rows = appliedRoles.map((r) => roleRow(r, actions)).join('');
 
+  const kpiWave = '<svg class="wave" viewBox="0 0 300 42" preserveAspectRatio="none" aria-hidden="true"><path d="M0 26 Q 75 6 150 22 T 300 16 V42 H0 Z" fill="#fff"/></svg>';
+
   return `
     <div class="view-home">
       <div class="kpi-row">
         <div class="kpi-tile spectrum-1" data-nav="saved">
           <div class="kpi-icon">${ICON_BOOKMARK}</div>
           <div class="kpi-body">
+            ${kpiWave}
             <div class="kpi-label">Saved jobs</div>
             <div class="kpi-value">${savedCount}</div>
           </div>
@@ -252,6 +255,7 @@ async function renderHome() {
         <div class="kpi-tile spectrum-2" data-nav="digest">
           <div class="kpi-icon">${ICON_STAR}</div>
           <div class="kpi-body">
+            ${kpiWave}
             <div class="kpi-label">High fit (9+)</div>
             <div class="kpi-value">${highFitCount}</div>
           </div>
@@ -259,6 +263,7 @@ async function renderHome() {
         <div class="kpi-tile spectrum-3" data-nav="applications">
           <div class="kpi-icon">${ICON_CHECK}</div>
           <div class="kpi-body">
+            ${kpiWave}
             <div class="kpi-label">Applied</div>
             <div class="kpi-value">${appliedApps.length}</div>
           </div>
@@ -266,9 +271,19 @@ async function renderHome() {
         <div class="kpi-tile spectrum-4" data-nav="applications">
           <div class="kpi-icon">${ICON_CLOCK}</div>
           <div class="kpi-body">
+            ${kpiWave}
             <div class="kpi-label">To do</div>
             <div class="kpi-value">${todoCount}</div>
           </div>
+        </div>
+      </div>
+      <div class="pipeline-panel">
+        <h2>Your pipeline</h2>
+        <div class="pipeline">
+          <div class="stage"><div class="line"></div><div class="dot">${ICON_CHECK}</div><div class="title">Find</div><div class="sub">Job digest finds matches</div></div>
+          <div class="stage current"><div class="line"></div><div class="dot"></div><div class="title">Apply</div><div class="sub">Save, tailor &amp; submit</div></div>
+          <div class="stage"><div class="line"></div><div class="dot">${ICON_CHECK}</div><div class="title">Track</div><div class="sub">Manage applications</div></div>
+          <div class="stage"><div class="dot">${ICON_CHECK}</div><div class="title">Land</div><div class="sub">Interview &amp; negotiate</div></div>
         </div>
       </div>
       <div class="panel">

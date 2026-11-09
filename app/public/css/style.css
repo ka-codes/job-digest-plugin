@@ -66,12 +66,12 @@
   --radius-control: 12px;
   --radius-pill: 999px;
   --sidebar-width: 224px;
-  --topbar-height: 64px;
+  --topbar-height: 220px;
   --gap: 16px;
   --pad: 22px;
   --control-height: 40px;
 
-  --fs-title: 22px;
+  --fs-title: 34px;
   --fs-section: 16px;
   --fs-kpi: 24px;
   --fs-body: 14px;
@@ -175,7 +175,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   background:
     radial-gradient(ellipse 520px 320px at 25% 88%, rgba(255, 255, 255, .09), transparent 60%),
     radial-gradient(ellipse 420px 280px at 75% 100%, rgba(20, 220, 190, .18), transparent 60%),
-    linear-gradient(165deg, #3a2d78 0%, #4a3a93 28%, #2d6f94 68%, #0fa093 100%);
+    linear-gradient(165deg, #0c3650 0%, #0d6a6a 55%, #11a98f 100%);
 }
 
 .product-mark { display: flex; align-items: center; gap: 10px; padding: 0 4px 28px; }
@@ -186,14 +186,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
   flex: none;
 }
 .product-mark .mark svg { width: 24px; height: 24px; }
-.product-mark .name { font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 17px; color: #fff; }
+.product-mark .name { font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 19px; color: #fff; }
 
 .nav { display: flex; flex-direction: column; gap: 4px; }
 .nav a {
   display: flex; align-items: center; gap: 12px;
   min-height: 44px; padding: 10px 16px;
   border-radius: var(--radius-pill);
-  font-size: 15px; font-weight: 600;
+  font-size: 17px; font-weight: 600;
   color: rgba(255, 255, 255, .8);
   background: transparent;
   box-shadow: none;
@@ -204,14 +204,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Only the active page gets a solid white pill — every other item stays
    flat on the gradient, so the one place you are reads unmistakably. */
-.nav a.active { background: #fff; color: #342a6e; font-weight: 700; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .35); }
+.nav a.active { background: #fff; color: #0d5a55; font-weight: 700; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .35); }
 .nav a.active:hover { background: #fff; }
 
-.sidebar-footer { margin-top: auto; padding-top: 16px; font-size: 12px; color: rgba(255, 255, 255, .65); }
+.sidebar-footer { margin-top: auto; padding-top: 16px; font-size: 15px; color: rgba(255, 255, 255, .65); }
 .sidebar-edit-btn {
   display: flex; align-items: center; justify-content: center;
   margin-top: 16px; height: 48px; border-radius: var(--radius-pill);
-  background: rgba(0, 0, 0, .28); color: #fff; font-weight: 700; font-size: 15px;
+  background: rgba(0, 0, 0, .28); color: #fff; font-weight: 700; font-size: 17px;
   border: none; cursor: pointer; text-decoration: none;
 }
 .sidebar-edit-btn:hover { background: rgba(0, 0, 0, .4); text-decoration: none; }
@@ -219,14 +219,20 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .topbar {
   grid-area: topbar;
   border-bottom: 1px solid var(--rule);
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 32px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 28px 32px;
   gap: 16px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
 }
-.topbar-title-group { display: flex; align-items: center; gap: 10px; min-width: 0; }
+/* Decorative watercolor-style hill graphic behind the title/controls, sized
+   to the topbar's own box so it scales with --topbar-height. */
+.topbar-wave { position: absolute; top: 0; right: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.topbar-title-group { display: flex; align-items: center; gap: 10px; min-width: 0; position: relative; z-index: 1; }
 .topbar h1 { font-family: "Montserrat", sans-serif; font-size: var(--fs-title); font-weight: 700; margin: 0; }
-.topbar .count-chip-topbar { font-size: 13px; color: var(--muted); background: var(--neutral-bg); border-radius: var(--radius-pill); padding: 3px 12px; font-weight: 700; flex: none; }
-.topbar .freshness { font-size: var(--fs-small); color: var(--faint); display: flex; align-items: center; gap: 12px; flex: none; }
+.topbar .count-chip-topbar { font-size: 16px; color: var(--muted); background: var(--neutral-bg); border-radius: var(--radius-pill); padding: 4px 14px; font-weight: 700; flex: none; }
+.topbar .freshness { font-size: 16px; color: var(--faint); display: flex; align-items: center; gap: 12px; flex: none; position: relative; z-index: 1; }
 
 .theme-toggle, .icon-btn {
   width: 36px; height: 36px; border-radius: 50%;
@@ -243,10 +249,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
    every other pastel-wash button. */
 .btn-run-now {
   display: inline-flex; align-items: center; gap: 8px;
-  height: var(--control-height); padding: 0 20px;
+  height: 46px; padding: 0 24px;
   border-radius: var(--radius-pill); border: none; cursor: pointer;
   background: linear-gradient(180deg, #3d5a96, #2aa3a0);
-  color: #fff; font-size: 14px; font-weight: 700;
+  color: #fff; font-size: 17px; font-weight: 700;
   box-shadow: 0 8px 20px -8px rgba(42, 120, 150, .55);
 }
 .btn-run-now:hover { filter: brightness(1.05); }
@@ -303,9 +309,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* ---- KPI tiles (home screen) ----
    Two-tone split card: a darker solid icon strip on the left, a lighter
-   gradient body on the right carrying the label + value. The four tiles
-   read as one purple-to-amber spectrum left to right (dark mode uses its
-   own teal-blue-to-yellow variant instead — see the dark theme section). */
+   gradient body on the right carrying the label + value, with a decorative
+   wave riding the bottom of each. The four tiles read as one navy-to-mint
+   spectrum left to right (dark mode uses its own teal-blue-to-yellow variant
+   instead — see the dark theme section). */
 
 .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); margin: 24px 0 32px; }
 .kpi-tile {
@@ -328,21 +335,25 @@ button, input, select, textarea { font: inherit; color: inherit; }
   flex: 1;
   padding: 18px 20px;
   display: flex; flex-direction: column; gap: 8px; justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
-.kpi-tile .kpi-label { font-size: 13px; color: rgba(255, 255, 255, .92); font-weight: 600; }
-.kpi-tile .kpi-value { font-family: "Montserrat", sans-serif; font-size: 32px; font-weight: 700; line-height: 1; }
-.kpi-tile.spectrum-1 { box-shadow: 0 14px 34px -12px rgba(69, 58, 107, .5); }
-.kpi-tile.spectrum-1 .kpi-icon { background: #453a6b; }
-.kpi-tile.spectrum-1 .kpi-body { background: linear-gradient(90deg, #5b4c87, #7664a0); }
-.kpi-tile.spectrum-2 { box-shadow: 0 14px 34px -12px rgba(94, 51, 80, .5); }
-.kpi-tile.spectrum-2 .kpi-icon { background: #5e3350; }
-.kpi-tile.spectrum-2 .kpi-body { background: linear-gradient(90deg, #7a4566, #9c5c7a); }
-.kpi-tile.spectrum-3 { box-shadow: 0 14px 34px -12px rgba(138, 59, 72, .5); }
-.kpi-tile.spectrum-3 .kpi-icon { background: #8a3b48; }
-.kpi-tile.spectrum-3 .kpi-body { background: linear-gradient(90deg, #b14f5c, #d97a82); }
-.kpi-tile.spectrum-4 { box-shadow: 0 14px 34px -12px rgba(147, 90, 34, .5); }
-.kpi-tile.spectrum-4 .kpi-icon { background: #935a22; }
-.kpi-tile.spectrum-4 .kpi-body { background: linear-gradient(90deg, #c9823f, #e0a868); }
+/* Decorative wave riding the bottom of each tile's body, behind the label/value. */
+.kpi-tile .wave { position: absolute; bottom: 0; left: 0; width: 100%; height: 42px; opacity: .22; }
+.kpi-tile .kpi-label { position: relative; z-index: 1; font-size: 17px; color: rgba(255, 255, 255, .92); font-weight: 600; }
+.kpi-tile .kpi-value { position: relative; z-index: 1; font-family: "Montserrat", sans-serif; font-size: 44px; font-weight: 700; line-height: 1; }
+.kpi-tile.spectrum-1 { box-shadow: 0 14px 34px -12px rgba(31, 79, 120, .5); }
+.kpi-tile.spectrum-1 .kpi-icon { background: #1a3f5e; }
+.kpi-tile.spectrum-1 .kpi-body { background: linear-gradient(90deg, #1f4f78, #2f72a0); }
+.kpi-tile.spectrum-2 { box-shadow: 0 14px 34px -12px rgba(10, 111, 104, .5); }
+.kpi-tile.spectrum-2 .kpi-icon { background: #075a54; }
+.kpi-tile.spectrum-2 .kpi-body { background: linear-gradient(90deg, #0a6f68, #0f9485); }
+.kpi-tile.spectrum-3 { box-shadow: 0 14px 34px -12px rgba(19, 154, 140, .45); }
+.kpi-tile.spectrum-3 .kpi-icon { background: #0f7a6e; }
+.kpi-tile.spectrum-3 .kpi-body { background: linear-gradient(90deg, #139a8c, #2bbfae); }
+.kpi-tile.spectrum-4 { box-shadow: 0 14px 34px -12px rgba(110, 215, 168, .5); }
+.kpi-tile.spectrum-4 .kpi-icon { background: #4fb588; }
+.kpi-tile.spectrum-4 .kpi-body { background: linear-gradient(90deg, #6ed7a8, #9ee8bb); }
 
 /* Dark mode gets its own spectrum — teal/blue/yellow only, no purple or
    magenta/red, per direct request to keep purple minimal in dark mode. */
@@ -358,6 +369,23 @@ button, input, select, textarea { font: inherit; color: inherit; }
 [data-theme="dark"] .kpi-tile.spectrum-4 { box-shadow: 0 14px 34px -12px rgba(201, 138, 46, .5); }
 [data-theme="dark"] .kpi-tile.spectrum-4 .kpi-icon { background: #c98a2e; }
 [data-theme="dark"] .kpi-tile.spectrum-4 .kpi-body { background: linear-gradient(90deg, #c98a2e, #f0b429); }
+
+/* ---- Pipeline stepper (home screen) ----
+   A static, always-the-same-way 4-stage explainer of the app's own workflow
+   — not tied to any one role's real progress, since many roles are tracked
+   in parallel and there's no single "current step" to highlight. */
+
+.pipeline-panel { background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius-card); padding: 26px 28px; margin-bottom: var(--gap); box-shadow: 0 1px 3px rgba(0, 0, 0, .04); }
+.pipeline-panel h2 { font-family: "Montserrat", sans-serif; font-size: 21px; font-weight: 700; margin: 0 0 20px; }
+.pipeline { display: flex; align-items: flex-start; }
+.stage { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; }
+.stage .dot { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; z-index: 1; background: #0f8a6e; }
+.stage .dot svg { width: 19px; height: 19px; stroke: #fff; fill: none; stroke-width: 2.2; }
+.stage.current .dot { background: var(--panel); border: 3px solid #0f8a6e; }
+.stage .line { position: absolute; top: 24px; left: 50%; width: 100%; height: 3px; background: #0f8a6e; z-index: 0; }
+.stage:last-child .line { display: none; }
+.stage .title { font-weight: 800; font-size: 17px; margin-bottom: 3px; }
+.stage .sub { font-size: 14px; color: var(--muted); }
 
 /* ---- Panels / cards ---- */
 
@@ -386,8 +414,19 @@ button, input, select, textarea { font: inherit; color: inherit; }
    a soft glow behind each panel, and a vivid gradient header bar (not a pale
    tint — a tint blended into the cream page background and disappeared). */
 .view-home .panel { box-shadow: 0 0 50px -8px var(--glow-home); }
-.view-home .panel-header { background: linear-gradient(135deg, #724a8f, #b8568c); }
-.view-home .panel-header h2 { color: #fff; }
+.view-home .panel-header { background: linear-gradient(135deg, #0f7a6e, #1fa88f); }
+.view-home .panel-header h2 { color: #fff; font-size: 19px; }
+/* Dark mode keeps the original violet/pink header it already shipped with —
+   the light-mode switch to teal above is a light-theme-only change. */
+[data-theme="dark"] .view-home .panel-header { background: linear-gradient(135deg, #724a8f, #b8568c); }
+/* Home's own role-row text runs larger than the shared app default, to match
+   the approved redesign — scoped here so Saved Jobs/Applications/Job Digest,
+   which reuse the same role-row markup, are unaffected. */
+.view-home .role-title { font-size: 18px; }
+.view-home .role-meta { font-size: 15px; }
+.view-home .role-why { font-size: 15px; }
+.view-home .role-actions a, .view-home .role-actions button { font-size: 14px; padding: 10px 17px; }
+.view-home .pill { font-size: 13px; }
 .view-digest .panel { box-shadow: 0 0 50px -8px var(--glow-digest); }
 .view-digest .panel-header { background: var(--grad-digest); }
 .view-digest .panel-header h2 { color: #fff; }
@@ -626,10 +665,19 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---- Phone ---- */
 
 @media (max-width: 760px) {
-  .shell { grid-template-columns: 1fr; grid-template-rows: 56px 1fr; grid-template-areas: "topbar" "main"; }
+  .shell { grid-template-columns: 1fr; grid-template-rows: auto 1fr; grid-template-areas: "topbar" "main"; }
   .sidebar { position: fixed; inset: 0; z-index: 20; display: none; }
   .sidebar.open { display: flex; }
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .main { padding: 20px 16px 48px; }
   .field-row { grid-template-columns: 1fr; }
+  /* The taller desktop topbar (wave graphic, bigger title) doesn't fit a
+     phone width — collapse it back to a compact, wrapped bar instead of
+     clipping/overlapping its contents. */
+  .topbar { height: auto; flex-wrap: wrap; align-items: center; padding: 12px 16px; row-gap: 8px; }
+  .topbar-wave { display: none; }
+  .topbar h1 { font-size: 20px; }
+  .topbar .count-chip-topbar { font-size: 12px; padding: 2px 10px; }
+  .topbar .freshness { font-size: 11px; gap: 8px; }
+  .btn-run-now { height: 36px; padding: 0 14px; font-size: 13px; }
 }
