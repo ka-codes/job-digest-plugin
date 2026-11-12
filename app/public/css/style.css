@@ -66,7 +66,7 @@
   --radius-control: 12px;
   --radius-pill: 999px;
   --sidebar-width: 224px;
-  --topbar-height: 220px;
+  --topbar-height: 124px;
   --gap: 16px;
   --pad: 22px;
   --control-height: 40px;
@@ -226,9 +226,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
   overflow: hidden;
   box-sizing: border-box;
 }
-/* Decorative watercolor-style hill graphic behind the title/controls, sized
-   to the topbar's own box so it scales with --topbar-height. */
-.topbar-wave { position: absolute; top: 0; right: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+/* Decorative watercolor-style hill graphic behind the title/controls. Fixed
+   to its original 220px design height (not tied to --topbar-height) so
+   shrinking the topbar crops the graphic via .topbar's overflow:hidden
+   instead of squashing/rescaling it. */
+.topbar-wave { position: absolute; top: 0; right: 0; width: 100%; height: 220px; z-index: 0; pointer-events: none; }
 .topbar-title-group { display: flex; align-items: center; gap: 10px; min-width: 0; position: relative; z-index: 1; }
 .topbar h1 { font-family: "Montserrat", sans-serif; font-size: var(--fs-title); font-weight: 700; margin: 0; }
 .topbar .count-chip-topbar { font-size: 16px; color: var(--muted); background: var(--neutral-bg); border-radius: var(--radius-pill); padding: 4px 14px; font-weight: 700; flex: none; }

@@ -216,7 +216,7 @@ const ICON_CLOCK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><pat
 async function renderHome() {
   const [roles, applications] = await Promise.all([api.get('/roles'), api.get('/applications')]);
   const savedCount = roles.filter((r) => r.digest_status === 'saved').length;
-  const highFitCount = roles.filter((r) => (r.fit_score || 0) >= 9 && r.digest_status !== 'closed' && r.digest_status !== 'not_qualifying').length;
+  const highFitCount = roles.filter((r) => (r.fit_score || 0) >= 7 && r.digest_status !== 'closed' && r.digest_status !== 'not_qualifying').length;
   const appliedApps = applications.filter((a) => a.status !== 'not_applied');
   const appByRoleId = Object.fromEntries(applications.map((a) => [a.role_id, a]));
   const todoCount = roles.filter((r) => {
@@ -252,11 +252,11 @@ async function renderHome() {
             <div class="kpi-value">${savedCount}</div>
           </div>
         </div>
-        <div class="kpi-tile spectrum-2" data-nav="digest">
+        <div class="kpi-tile spectrum-2" data-nav="high-fit">
           <div class="kpi-icon">${ICON_STAR}</div>
           <div class="kpi-body">
             ${kpiWave}
-            <div class="kpi-label">High fit (9+)</div>
+            <div class="kpi-label">High fit (7+)</div>
             <div class="kpi-value">${highFitCount}</div>
           </div>
         </div>
@@ -493,6 +493,33 @@ async function renderSaved() {
     </div>`;
 }
 
+async function renderHighFit() {
+  const roles = await api.get('/roles');
+  // Same criteria as the Home KPI tile's highFitCount, so the number on the
+  // tile and the list it opens always agree.
+  const highFit = roles
+    .filter((r) => (r.fit_score || 0) >= 7 && r.digest_status !== 'closed' && r.digest_status !== 'not_qualifying')
+    .sort((a, b) => (b.fit_score || 0) - (a.fit_score || 0));
+  currentViewCount = highFit.length;
+  const orgs = [...new Set(highFit.map((r) => r.org))].sort();
+
+  const actions = `<button data-action="tailor-cv">${ICON_DOCUMENT}Tailor CV</button>
+    <button data-action="reword">${ICON_PENCIL}Draft Cover Letter</button>
+    <span class="role-actions-spacer"></span>
+    <button data-action="save">${ICON_BOOKMARK}Save</button>
+    <button data-action="not_qualifying">${ICON_THUMBS_DOWN}Not for me</button>`;
+  const rowsFor = (list) => list.map((r) => roleRow(r, actions)).join('');
+
+  return `
+    <div class="view-high-fit">
+      ${roleFilterBar(orgs)}
+      <div class="panel">
+        <div class="panel-header"><h2>High fit roles (7+)</h2><span class="count-chip">${highFit.length}</span></div>
+        <div id="rf-results">${highFit.length ? rowsFor(highFit) : emptyNote('No roles scoring 7+ right now.')}</div>
+      </div>
+    </div>`;
+}
+
 const APPLICATION_STATUSES = ['not_applied', 'applied', 'interviewing', 'offer', 'rejected', 'withdrawn'];
 const STATUS_LABELS = {
   not_applied: 'Saved, not yet applied', applied: 'Applied', interviewing: 'Interviewing',
@@ -722,21 +749,36 @@ function serializeEmployersMarkdown(intro, groups) {
   return lines.join('\n').trim();
 }
 
-function employerRow(name, url) {
+function categoryLabel(category, allChecked = true) {
+  return `
+    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+      <input type="checkbox" class="category-toggle-all" ${allChecked ? 'checked' : ''} style="width:16px; height:16px; flex:none;">
+      <span>${esc(category)}</span>
+    </label>`;
+}
+
+function employerRow(name, url, checked = true) {
   return `
     <label style="display:flex; align-items:center; gap:10px; padding:6px 0; font-weight:500; cursor:pointer;">
-      <input type="checkbox" data-employer-name="${esc(name)}" data-employer-url="${esc(url)}" checked style="width:16px; height:16px; flex:none;">
+      <input type="checkbox" data-employer-name="${esc(name)}" data-employer-url="${esc(url)}" ${checked ? 'checked' : ''} style="width:16px; height:16px; flex:none;">
       <span>${esc(name)} <span style="opacity:.7; font-size:12px;">— ${esc(url)}</span></span>
     </label>`;
 }
 
 async function renderProfile() {
   const [prefs, settings] = await Promise.all([api.get('/setup/preferences'), api.get('/settings')]);
-  const parsed = parseEmployersMarkdown(prefs.employers || '');
+  // The full employer roster (including unchecked/disabled ones) lives in
+  // employersCatalog, kept separate from profile.md's "Priority employers"
+  // section — that section only ever lists currently-enabled employers (it's
+  // what the digest skill reads), so an unchecked employer disappears from it
+  // entirely. Without a separate durable catalog, unchecking + saving would
+  // permanently delete that employer from the UI with no way to turn it back
+  // on — the catalog is what makes it just "off", not "gone".
+  const parsed = { groups: prefs.employersCatalog?.groups || parseEmployersMarkdown(prefs.employers || '').groups };
 
   const groupsHtml = parsed.groups
     .map((g) => `<div class="field" data-category="${esc(g.category)}">
-        <label>${esc(g.category)}</label>${g.items.map((i) => employerRow(i.name, i.url)).join('')}
+        ${categoryLabel(g.category, g.items.every((i) => i.checked !== false))}${g.items.map((i) => employerRow(i.name, i.url, i.checked !== false)).join('')}
       </div>`)
     .join('');
 
@@ -808,6 +850,7 @@ const VIEWS = {
   home: { title: 'Home', render: renderHome },
   digest: { title: 'Job digest', render: renderDigest },
   saved: { title: 'Saved jobs', render: renderSaved },
+  'high-fit': { title: 'High fit roles (7+)', render: renderHighFit },
   applications: { title: 'Applications', render: renderApplications },
   'cv-letters': { title: 'CV and Cover Letters', render: renderCvLetters },
   profile: { title: 'Profile & preferences', render: renderProfile },
@@ -837,6 +880,49 @@ window.addEventListener('hashchange', () => navigate(location.hash.replace('#/',
 
 // ---------------------------------------------------------------- Actions
 
+// Save / Not for me / Remove change a role's status so it no longer belongs
+// in the list being viewed — drop just that row in place instead of
+// re-rendering the whole view, so the page doesn't jump back to the top.
+function removeRoleRow(root, row) {
+  const container = row.parentElement;
+  const panel = row.closest('.panel');
+  const chip = panel?.querySelector('.panel-header .count-chip');
+  row.remove();
+  if (chip) {
+    const n = Math.max(0, (parseInt(chip.textContent, 10) || 0) - 1);
+    chip.textContent = n;
+  }
+  if (container && !container.querySelector('.role-row')) {
+    container.insertAdjacentHTML('beforeend', emptyNote('Nothing here right now.'));
+  }
+  if (currentViewCount != null) {
+    currentViewCount = Math.max(0, currentViewCount - 1);
+    const countEl = document.getElementById('topbar-count');
+    if (countEl) {
+      if (currentViewCount === 0) countEl.hidden = true;
+      else countEl.textContent = `${currentViewCount} ${currentViewCount === 1 ? 'job' : 'jobs'}`;
+    }
+  }
+}
+
+async function updateHomeKpis(root) {
+  const [roles, applications] = await Promise.all([api.get('/roles'), api.get('/applications')]);
+  const savedCount = roles.filter((r) => r.digest_status === 'saved').length;
+  const highFitCount = roles.filter((r) => (r.fit_score || 0) >= 7 && r.digest_status !== 'closed' && r.digest_status !== 'not_qualifying').length;
+  const appliedCount = applications.filter((a) => a.status !== 'not_applied').length;
+  const appByRoleId = Object.fromEntries(applications.map((a) => [a.role_id, a]));
+  const todoCount = roles.filter((r) => {
+    if (r.digest_status !== 'saved') return false;
+    const app = appByRoleId[r.id];
+    return !app || app.status === 'not_applied';
+  }).length;
+  const vals = root.querySelectorAll('.kpi-row .kpi-value');
+  if (vals[0]) vals[0].textContent = savedCount;
+  if (vals[1]) vals[1].textContent = highFitCount;
+  if (vals[2]) vals[2].textContent = appliedCount;
+  if (vals[3]) vals[3].textContent = todoCount;
+}
+
 function bindViewActions(root, view) {
   root.querySelectorAll('[data-nav]').forEach((el) => {
     el.addEventListener('click', () => (location.hash = `#/${el.dataset.nav}`));
@@ -844,6 +930,12 @@ function bindViewActions(root, view) {
 
   if (view === 'saved' && root.querySelector('#rf-search')) {
     api.get('/roles').then((roles) => applyRoleFilters(root, roles.filter((r) => r.digest_status === 'saved')));
+  }
+
+  if (view === 'high-fit' && root.querySelector('#rf-search')) {
+    api.get('/roles').then((roles) =>
+      applyRoleFilters(root, roles.filter((r) => (r.fit_score || 0) >= 7 && r.digest_status !== 'closed' && r.digest_status !== 'not_qualifying'))
+    );
   }
 
   if (view === 'digest' && root.querySelector('#digest-group-filter')) {
@@ -877,6 +969,11 @@ function bindViewActions(root, view) {
         const out = row.querySelector('.draft-output');
         out.style.display = 'block';
         out.innerHTML = draftOutputContent(roleId);
+        return;
+      }
+      if (action === 'save' || action === 'not_qualifying' || action === 'closed') {
+        removeRoleRow(root, row);
+        if (view === 'home') updateHomeKpis(root);
         return;
       }
       navigate(view);
@@ -978,6 +1075,14 @@ function bindViewActions(root, view) {
     });
     const employersBox = root.querySelector('#pf-employers');
 
+    employersBox.addEventListener('change', (e) => {
+      if (!e.target.classList.contains('category-toggle-all')) return;
+      const field = e.target.closest('.field');
+      field.querySelectorAll('input[type=checkbox][data-employer-name]').forEach((cb) => {
+        cb.checked = e.target.checked;
+      });
+    });
+
     root.querySelector('#pf-add-employer-btn').addEventListener('click', () => {
       const input = root.querySelector('#pf-add-employer');
       const value = input.value.trim();
@@ -993,7 +1098,7 @@ function bindViewActions(root, view) {
         customField = document.createElement('div');
         customField.className = 'field';
         customField.dataset.category = 'Your additions';
-        customField.innerHTML = '<label>Your additions</label>';
+        customField.innerHTML = categoryLabel('Your additions');
         employersBox.prepend(customField);
       }
       customField.insertAdjacentHTML('beforeend', employerRow(name, url));
@@ -1052,14 +1157,18 @@ function bindViewActions(root, view) {
       const btn = root.querySelector('#pf-save-employers');
       btn.disabled = true;
       btn.textContent = 'Saving…';
+      // Capture every employer, checked or not — the markdown sent to the
+      // skill only ever includes the checked ones (serializeEmployersMarkdown
+      // drops the rest), but the full catalog is what lets an unchecked
+      // employer stay visible so it can be turned back on later instead of
+      // vanishing the moment this save goes through.
       const groups = Array.from(employersBox.querySelectorAll('[data-category]')).map((field) => ({
         category: field.dataset.category,
-        items: Array.from(field.querySelectorAll('input[type=checkbox]'))
-          .filter((cb) => cb.checked)
-          .map((cb) => ({ name: cb.dataset.employerName, url: cb.dataset.employerUrl, checked: true })),
+        items: Array.from(field.querySelectorAll('input[type=checkbox][data-employer-name]'))
+          .map((cb) => ({ name: cb.dataset.employerName, url: cb.dataset.employerUrl, checked: cb.checked })),
       }));
       const employers = serializeEmployersMarkdown('', groups);
-      await api.post('/setup/preferences', { employers });
+      await api.post('/setup/preferences', { employers, employersCatalog: { groups } });
       flashSaved(btn);
     });
   }

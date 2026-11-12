@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { execFile } from 'node:child_process';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,6 +15,80 @@ import { generateBackground } from '../lib/background.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const migrateScript = join(__dirname, '..', '..', 'scripts', 'migrate-job-log.mjs');
+
+// The "Priority employers" section of profile.md only ever lists currently-
+// enabled employers (that's what the digest skill reads), so unchecking one
+// in the UI and saving used to drop it from that markdown entirely — with
+// nowhere else recording it existed, there was no way to see or re-check it.
+// This catalog file is the durable, UI-only record of every employer the
+// user has ever had (checked or not), kept separate from profile.md so the
+// skill's contract (that section = enabled employers only) never changes.
+function employersCatalogPath(workspaceDir) {
+  return join(workspaceDir, 'employers-catalog.json');
+}
+
+function readEmployersCatalog(workspaceDir) {
+  const p = employersCatalogPath(workspaceDir);
+  if (!existsSync(p)) return null;
+  try {
+    const parsed = JSON.parse(readFileSync(p, 'utf8'));
+    return Array.isArray(parsed?.groups) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeEmployersCatalog(workspaceDir, catalog) {
+  writeFileSync(employersCatalogPath(workspaceDir), JSON.stringify(catalog, null, 2));
+}
+
+function parseEmployersSection(md) {
+  const groups = [];
+  let current = null;
+  for (const line of (md || '').split('\n')) {
+    const h = line.match(/^###\s+(.*)/);
+    const item = line.match(/^-\s*(.+?)\s*—\s*(\S+.*)$/);
+    if (h) {
+      current = { category: h[1].trim(), items: [] };
+      groups.push(current);
+    } else if (item && current) {
+      current.items.push({ name: item[1].trim(), url: item[2].trim() });
+    }
+  }
+  return groups;
+}
+
+// Runs once, the first time a workspace is read after this catalog was
+// introduced. The template's full roster is the only remaining record of
+// which employers exist at all (an employer unchecked-then-saved under the
+// old behavior is no longer in profile.md anywhere) — so it doubles as the
+// master list here, with checked state recovered from whichever of those
+// employers are still present in the user's current (enabled-only) section.
+function bootstrapEmployersCatalog(workspaceDir, currentEmployersMd) {
+  const templateGroups = parseEmployersSection(getTemplateSection('priority employers'));
+  const currentGroups = parseEmployersSection(currentEmployersMd);
+  const currentNamesByCategory = new Map(currentGroups.map((g) => [g.category, new Set(g.items.map((i) => i.name))]));
+
+  const groups = templateGroups.map((g) => ({
+    category: g.category,
+    items: g.items.map((i) => ({ ...i, checked: currentNamesByCategory.get(g.category)?.has(i.name) ?? false })),
+  }));
+
+  // Carry over any category/employer in the user's current list that isn't
+  // part of the template roster at all (e.g. custom "Your additions") — it
+  // only exists there because the user actively added it, so it's checked.
+  for (const cg of currentGroups) {
+    let g = groups.find((x) => x.category === cg.category);
+    if (!g) { g = { category: cg.category, items: [] }; groups.push(g); }
+    for (const item of cg.items) {
+      if (!g.items.some((x) => x.name === item.name)) g.items.push({ ...item, checked: true });
+    }
+  }
+
+  const catalog = { groups };
+  writeEmployersCatalog(workspaceDir, catalog);
+  return catalog;
+}
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
@@ -165,6 +239,7 @@ router.get('/setup/preferences', (_req, res) => {
   const payFloorMatch = payRaw.match(/floor[^:]*:\s*([\d,]+)/i);
   const payGoalMatch = payRaw.match(/goal:\s*([\d,]+)/i);
   const employers = getProfileSection(workspaceDir, 'priority employers');
+  const employersCatalog = readEmployersCatalog(workspaceDir) || bootstrapEmployersCatalog(workspaceDir, employers);
 
   res.json({
     background,
@@ -173,6 +248,7 @@ router.get('/setup/preferences', (_req, res) => {
     payFloor: payFloorMatch ? payFloorMatch[1].replace(/,/g, '') : '',
     payGoal: payGoalMatch ? payGoalMatch[1].replace(/,/g, '') : '',
     employers,
+    employersCatalog,
   });
 });
 
@@ -180,7 +256,7 @@ router.post('/setup/preferences', (req, res) => {
   const workspaceDir = getWorkspaceDir();
   if (!workspaceDir) return res.status(400).json({ error: 'no workspace configured yet' });
 
-  const { background, target, locations, payFloor, payGoal, employers } = req.body;
+  const { background, target, locations, payFloor, payGoal, employers, employersCatalog } = req.body;
 
   if (background) replaceSection(workspaceDir, 'background', background);
   if (target) replaceSection(workspaceDir, 'target', target);
@@ -195,6 +271,7 @@ router.post('/setup/preferences', (req, res) => {
     );
   }
   if (employers) replaceSection(workspaceDir, 'priority employers', employers);
+  if (employersCatalog && Array.isArray(employersCatalog.groups)) writeEmployersCatalog(workspaceDir, employersCatalog);
 
   res.json({ ok: true });
 });
