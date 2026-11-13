@@ -824,7 +824,7 @@ async function renderProfile() {
         </div>
         <p class="hint" id="pf-schedule-hint">${settings.paused
           ? 'Scheduled runs are paused — use Run now any time to check manually.'
-          : 'A thorough run checks every priority employer and aggregator and typically takes 10-15+ minutes of real Claude Code activity. On a subscription plan this draws from the same usage pool as your regular Claude Code sessions, not a separate bill.'}</p>
+          : 'A thorough run checks every priority employer and aggregator and typically takes 5-10 minutes of real Claude Code activity. On a subscription plan this draws from the same usage pool as your regular Claude Code sessions, not a separate bill.'}</p>
         <div style="display:flex; justify-content:flex-end; margin-top:10px;">
           <button class="btn primary" id="pf-save-schedule">Save changes</button>
         </div>
@@ -1083,26 +1083,25 @@ function bindViewActions(root, view) {
       });
     });
 
-    root.querySelector('#pf-add-employer-btn').addEventListener('click', () => {
+    // Same lookup as the Job digest tab's Add box: finds the real careers URL
+    // and any job-board connector, instead of saving a placeholder URL.
+    root.querySelector('#pf-add-employer-btn').addEventListener('click', async () => {
       const input = root.querySelector('#pf-add-employer');
+      const btn = root.querySelector('#pf-add-employer-btn');
       const value = input.value.trim();
       if (!value) return;
-      let name = value;
-      let url = '(search for current openings)';
-      if (/^https?:\/\//i.test(value)) {
-        url = value;
-        try { name = new URL(value).hostname.replace(/^www\./, ''); } catch { /* keep raw value as name */ }
+      btn.disabled = true;
+      btn.textContent = 'Looking up careers page…';
+      const { result, error } = await api.post('/employers', { name: value });
+      btn.disabled = false;
+      if (error) {
+        btn.textContent = 'Add';
+        alert(`Could not add: ${error}`);
+        return;
       }
-      let customField = employersBox.querySelector('[data-category="Your additions"]');
-      if (!customField) {
-        customField = document.createElement('div');
-        customField.className = 'field';
-        customField.dataset.category = 'Your additions';
-        customField.innerHTML = categoryLabel('Your additions');
-        employersBox.prepend(customField);
-      }
-      customField.insertAdjacentHTML('beforeend', employerRow(name, url));
       input.value = '';
+      alert(result);
+      navigate('profile');
     });
 
     const flashSaved = (btn) => {
@@ -1126,7 +1125,7 @@ function bindViewActions(root, view) {
       flashSaved(btn);
     });
 
-    const SCHEDULE_HINT = 'A thorough run checks every priority employer and aggregator and typically takes 10-15+ minutes of real Claude Code activity. On a subscription plan this draws from the same usage pool as your regular Claude Code sessions, not a separate bill.';
+    const SCHEDULE_HINT = 'A thorough run checks every priority employer and aggregator and typically takes 5-10 minutes of real Claude Code activity. On a subscription plan this draws from the same usage pool as your regular Claude Code sessions, not a separate bill.';
     const PAUSED_HINT = 'Scheduled runs are paused — use Run now any time to check manually.';
 
     root.querySelector('#pf-frequency').addEventListener('change', (e) => {

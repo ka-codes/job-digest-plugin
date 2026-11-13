@@ -241,6 +241,19 @@ router.get('/setup/preferences', (_req, res) => {
   const employers = getProfileSection(workspaceDir, 'priority employers');
   const employersCatalog = readEmployersCatalog(workspaceDir) || bootstrapEmployersCatalog(workspaceDir, employers);
 
+  // Employers added outside this screen (the skill's "add an employer" flow
+  // writes straight to profile.md) won't be in the catalog yet — fold them in
+  // as checked so they show up and can later be switched off without vanishing.
+  let catalogChanged = false;
+  for (const cg of parseEmployersSection(employers)) {
+    let g = employersCatalog.groups.find((x) => x.category === cg.category);
+    if (!g) { g = { category: cg.category, items: [] }; employersCatalog.groups.push(g); catalogChanged = true; }
+    for (const item of cg.items) {
+      if (!g.items.some((x) => x.name === item.name)) { g.items.push({ ...item, checked: true }); catalogChanged = true; }
+    }
+  }
+  if (catalogChanged) writeEmployersCatalog(workspaceDir, employersCatalog);
+
   res.json({
     background,
     target,

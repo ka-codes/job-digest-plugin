@@ -421,8 +421,7 @@ export function startWizard(onComplete) {
           <label>Time of day</label>
           <input type="time" id="wiz-time" value="06:00">
         </div>
-        <p class="hint" style="font-weight:600;">A thorough run checks every priority employer and aggregator in your profile and typically takes 10-15+ minutes of real Claude Code activity. On a Claude subscription (Pro/Max/Team) this doesn't cost extra, but it draws from the same 5-hour/weekly usage pool as your regular Claude Code sessions.</p>
-        <p class="hint">You can close this window any time — the app keeps running quietly in the background and still checks for jobs on schedule.</p>
+        <p class="hint" style="font-weight:600;">A thorough run checks every priority employer and aggregator in your profile and typically takes 5-10 minutes of real Claude Code activity. On a Claude subscription (Pro/Max/Team) this doesn't cost extra, but it draws from the same 5-hour/weekly usage pool as your regular Claude Code sessions.</p>
       </div>
       ${actions(false, 'Continue')}`;
 
