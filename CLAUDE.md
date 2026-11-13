@@ -1,10 +1,6 @@
 # Job Digest Plugin
 Electron + Express app that runs a Claude-driven job digest. Docs: `docs/DATA-SCHEMA.md` (roles.json shape), `docs/RELEASING.md` (release steps), `docs/SETUP-APP.md`, `PRODUCT.md`.
 
-## User preferences
-- Always respond with short, concise answers. No long paragraphs, no long plan documents during discussion.
-- Always give advice based on the user's computer: OMEN Transcend gaming laptop 14-fb 1xxx (Windows 11).
-
 ## Layout
 - `electron/` desktop shell; `app/server.mjs` Express server; `app/routes/*.mjs` API; `app/lib/` (scheduler, claude headless runner, store, profile-md)
 - `app/public/js/app.js` main UI, `wizard.js` first-run wizard, `css/style.css`
